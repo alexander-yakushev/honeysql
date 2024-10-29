@@ -1,7 +1,7 @@
 # Changes
 
 * 2.6.next in progress
-  * Fix [#549](https://github.com/seancorfield/honeysql/issues/549) by using `:bb` conditionals to support Babashka (and still support Clojure 1.9.0).
+  * Fix [#549](https://github.com/seancorfield/honeysql/issues/549) by using `:bb` conditionals to support Babashka (and still support Clojure 1.9.0), and add testing against Babashka so it is fully-supported as a target via PR [#550](https://github.com/seancorfield/honeysql/pull/550) [@borkdude](https://github.com/borkdude)
 
 * 2.6.1203 -- 2024-10-22
   * Fix [#548](https://github.com/seancorfield/honeysql/issues/548) which was a regression introduced in [#526](https://github.com/seancorfield/honeysql/issues/526) (in 2.6.1161).
