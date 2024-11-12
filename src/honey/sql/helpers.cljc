@@ -508,6 +508,16 @@
   [& args]
   (generic-1 :expr args))
 
+(defn exclude
+  "Accepts one or more column names to exclude from a select list."
+  [& args]
+  (generic :exclude args))
+
+(defn rename
+  "Accepts one or more column names with aliases to rename in a select list."
+  [& args]
+  (generic :rename args))
+
 (defn into
   "Accepts table name, optionally followed a database name."
   {:arglists '([table] [table dbname])}

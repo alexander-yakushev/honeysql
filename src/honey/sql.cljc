@@ -58,7 +58,7 @@
    :raw :nest :with :with-recursive :intersect :union :union-all :except :except-all
    :table
    :select :select-distinct :select-distinct-on :select-top :select-distinct-top
-   :distinct :expr
+   :distinct :expr :exclude :rename
    :into :bulk-collect-into
    :insert-into :replace-into :update :delete :delete-from :truncate
    :columns :set :from :using
@@ -775,28 +775,34 @@
     (let [[sqls params] (format-expr-list xs {:drop-ns true})]
       (into [(str "(" (join ", " sqls) ")")] params))))
 
-(defn- format-selects-common [prefix as xs]
-  (let [qualifier (format-meta xs)
-        prefix    (if prefix
-                    (cond-> prefix qualifier (str " " qualifier))
-                    qualifier)]
-    (if (sequential? xs)
-      (let [[sqls params] (reduce-sql (map #(format-selectable-dsl % {:as as})) xs)]
-        (when-not (= :none *checking*)
-          (when (empty? xs)
-            (throw (ex-info (str prefix " empty column list is illegal")
-                            {:clause (into [prefix] xs)}))))
-        (into [(str (when prefix (str prefix " ")) (join ", " sqls))] params))
-      (let [[sql & params] (format-selectable-dsl xs {:as as})]
-        (into [(str (when prefix (str prefix " ")) sql)] params)))))
+(defn- format-selects-common
+  ([prefix as xs] (format-selects-common prefix as xs nil))
+  ([prefix as xs wrap]
+   (let [qualifier (format-meta xs)
+         prefix    (if prefix
+                     (cond-> prefix qualifier (str " " qualifier))
+                     qualifier)
+         [pre post] (when (and wrap (sequential? xs) (< 1 (count xs)))
+                      ["(" ")"])]
+     (if (sequential? xs)
+       (let [[sqls params] (reduce-sql (map #(format-selectable-dsl % {:as as})) xs)]
+         (when-not (= :none *checking*)
+           (when (empty? xs)
+             (throw (ex-info (str prefix " empty column list is illegal")
+                             {:clause (into [prefix] xs)}))))
+         (into [(str (when prefix (str prefix " ")) pre (join ", " sqls) post)] params))
+       (let [[sql & params] (format-selectable-dsl xs {:as as})]
+         (into [(str (when prefix (str prefix " ")) sql)] params))))))
 
 (defn- format-selects [k xs]
   (format-selects-common
    (sql-kw k)
-   (#{:select :select-distinct :from :window :delete-from :facet
-      'select 'select-distinct 'from 'window 'delete-from 'facet}
+   (#{:select :select-distinct :rename :from :window :delete-from :facet
+      'select 'select-distinct 'rename 'from 'window 'delete-from 'facet
+      }
     k)
-   xs))
+   xs
+   (#{:exclude :rename 'exclude 'rename} k)))
 
 (defn- format-selects-on [_ xs]
   (let [[on & cols] xs
@@ -1610,6 +1616,8 @@
          :select-distinct-on #'format-selects-on
          :select-top      #'format-select-top
          :select-distinct-top #'format-select-top
+         :exclude         #'format-selects
+         :rename          #'format-selects
          :distinct        (fn [k xs] (format-selects k   [[xs]]))
          :expr            (fn [_ xs] (format-selects nil [[xs]]))
          :into            #'format-select-into
