@@ -533,6 +533,33 @@
                " MAX(salary) OVER w AS MaxSalary"
                " FROM employee"
                " WINDOW w AS (PARTITION BY department)")]))
+  ;; multiple window tests
+  (is (= (-> (select :id
+                     (over [[:avg :salary] (-> (partition-by :department) (order-by :designation)) :Average]
+                           [[:max :salary] :w :MaxSalary]))
+             (from :employee)
+             (window :w (partition-by :department))
+             (window :x (partition-by :salary))
+             sql/format)
+         [(str "SELECT id,"
+               " AVG(salary) OVER (PARTITION BY department ORDER BY designation ASC) AS Average,"
+               " MAX(salary) OVER w AS MaxSalary"
+               " FROM employee"
+               " WINDOW w AS (PARTITION BY department)"
+               ", x AS (PARTITION BY salary)")]))
+  (is (= (-> (select :id
+                     (over [[:avg :salary] (-> (partition-by :department) (order-by :designation)) :Average]
+                           [[:max :salary] :w :MaxSalary]))
+             (from :employee)
+             (window :w (partition-by :department)
+                     :x (partition-by :salary))
+             sql/format)
+         [(str "SELECT id,"
+               " AVG(salary) OVER (PARTITION BY department ORDER BY designation ASC) AS Average,"
+               " MAX(salary) OVER w AS MaxSalary"
+               " FROM employee"
+               " WINDOW w AS (PARTITION BY department)"
+               ", x AS (PARTITION BY salary)")]))
   ;; test nil / empty window function clause:
   (is (= (-> (select :id
                      (over [[:avg :salary] {} :Average]

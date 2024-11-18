@@ -1,6 +1,7 @@
 # Changes
 
 * 2.6.next in progress
+  * Fix [#551](https://github.com/seancorfield/honeysql/issues/551) by supporting multiple `WINDOW` clauses.
   * Fix [#549](https://github.com/seancorfield/honeysql/issues/549) by using `:bb` conditionals to support Babashka (and still support Clojure 1.9.0), and add testing against Babashka so it is fully-supported as a target via PR [#550](https://github.com/seancorfield/honeysql/pull/550) [@borkdude](https://github.com/borkdude)
   * Address [#532](https://github.com/seancorfield/honeysql/issues/532) by adding support for `EXCLUDE` and `RENAME` and starting to write tests for XTDB compatibility.
 

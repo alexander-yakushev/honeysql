@@ -953,6 +953,9 @@
 (defn- format-selector [k xs]
   (format-selects k [xs]))
 
+(defn- format-window [k xs]
+  (format-selects k (into [] (partition-all 2 xs))))
+
 (declare columns-from-values)
 
 (defn- format-insert [k table]
@@ -1643,7 +1646,7 @@
          :where           #'format-on-expr
          :group-by        #'format-group-by
          :having          #'format-on-expr
-         :window          #'format-selector
+         :window          #'format-window
          :partition-by    #'format-selects
          :order-by        #'format-order-by
          :limit           #'format-on-expr

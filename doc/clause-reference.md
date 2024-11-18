@@ -1090,7 +1090,7 @@ but is rendered into the SQL later in precedence order.
 
 ## window, partition-by (and over)
 
-`:window` accepts a pair of SQL entity (the window name)
+`:window` accept alternating pairs of SQL entity (the window name)
 and the window "function" as a SQL clause (a hash map).
 
 `:partition-by` accepts the same arguments as `:select` above
@@ -1116,6 +1116,25 @@ SELECT id, AVG(salary) OVER (PARTITION BY department ORDER BY designation ASC) A
 FROM employee
 WINDOW w AS (PARTITION BY department)
 "]
+;; multiple windows:
+user=> (sql/format {:select [:id
+                             [[:over
+                               [[:avg :salary]
+                                {:partition-by [:department]
+                                 :order-by [:designation]}
+                                :Average]
+                               [[:max :salary]
+                                :w
+                                :MaxSalary]]]]
+                    :from [:employee]
+                    :window [:w {:partition-by [:department]}
+                             :x {:partition-by [:salary]}]}
+                    {:pretty true})
+["
+SELECT id, AVG(salary) OVER (PARTITION BY department ORDER BY designation ASC) AS Average, MAX(salary) OVER w AS MaxSalary
+FROM employee
+WINDOW w AS (PARTITION BY department), x AS (PARTITION BY salary)
+"]
 ;; easier to write with helpers (and easier to read!):
 user=> (sql/format (-> (select :id
                                (over [[:avg :salary] (-> (partition-by :department) (order-by :designation)) :Average]
@@ -1127,6 +1146,18 @@ user=> (sql/format (-> (select :id
 SELECT id, AVG(salary) OVER (PARTITION BY department ORDER BY designation ASC) AS Average, MAX(salary) OVER w AS MaxSalary
 FROM employee
 WINDOW w AS (PARTITION BY department)
+"]
+;; multiple window clauses:
+user=> (sql/format (-> (select :id
+                               (over [[:avg :salary] (-> (partition-by :department) (order-by :designation)) :Average]
+                                     [[:max :salary] :w :MaxSalary]))
+                       (from :employee)
+                       (window :w (partition-by :department))
+                       (window :x (partition-by :salary)))                   {:pretty true})
+["
+SELECT id, AVG(salary) OVER (PARTITION BY department ORDER BY designation ASC) AS Average, MAX(salary) OVER w AS MaxSalary
+FROM employee
+WINDOW w AS (PARTITION BY department), x AS (PARTITION BY salary)
 "]
 ```
 
