@@ -1186,20 +1186,6 @@
   [k args]
   (generic-1 k args))
 
-#?(:clj
-   (do
-     ;; #409 this assert is only valid when :doc metadata is not elided:
-     (when (-> #'generic-helper-unary meta :doc)
-       ;; ensure #295 stays true (all public functions have docstring):
-       (assert (empty? (->> (ns-publics *ns*) (vals) (c/filter (comp not :doc meta))))))
-     ;; ensure all public functions match clauses:
-     (assert (= (c/set (conj @#'honey.sql/default-clause-order
-                             :composite :filter :lateral :over :within-group
-                             :upsert
-                             :generic-helper-variadic :generic-helper-unary))
-                (c/set (conj (map keyword (keys (ns-publics *ns*)))
-                             :nest :raw))))))
-
 (comment
   (-> (delete-from :table)
       (where [:in (composite :first :second)

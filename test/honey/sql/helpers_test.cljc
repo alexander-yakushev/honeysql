@@ -2,7 +2,8 @@
 
 (ns honey.sql.helpers-test
   (:refer-clojure :exclude [filter for group-by partition-by set update])
-  (:require [clojure.test :refer [deftest is testing]]
+  (:require [clojure.core :as c]
+            [clojure.test :refer [deftest is testing]]
             [honey.sql :as sql]
             [honey.sql.helpers :as h
              :refer [add-column add-index alter-table columns create-table create-table-as create-view
@@ -19,6 +20,23 @@
                      select select-distinct select-top select-distinct-top
                      values where window with with-columns
                      with-data within-group]]))
+
+#?(:clj
+   (deftest helpers-are-complete
+     (let [helpers-ns (find-ns 'honey.sql.helpers)]
+       (testing "all public helpers have docstrings"
+         ;; #409 this assert is only valid when :doc metadata is not elided:
+         (when (-> #'h/generic-helper-unary meta :doc)
+           ;; ensure #295 stays true (all public functions have docstring):
+           (is (= [] (->> (ns-publics helpers-ns) (vals) (c/filter (comp not :doc meta)))))))
+       (testing "all clauses have public helpers"
+         ;; ensure all public functions match clauses:
+         (is (= (c/set (conj @#'honey.sql/default-clause-order
+                             :composite :filter :lateral :over :within-group
+                             :upsert
+                             :generic-helper-variadic :generic-helper-unary))
+                (c/set (conj (map keyword (keys (ns-publics helpers-ns)))
+                             :nest :raw))))))))
 
 (deftest test-select
   (testing "large helper expression"
