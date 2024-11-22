@@ -1877,6 +1877,17 @@
         (into paramsx)
         (into params))))
 
+(defn- between-fn
+  "For both :between and :not-between"
+  [k [x a b]]
+  (let [[sql-x & params-x] (format-expr x {:nested true})
+        [sql-a & params-a] (format-expr a {:nested true})
+        [sql-b & params-b] (format-expr b {:nested true})]
+    (-> [(str sql-x " " (sql-kw k) " " sql-a " AND " sql-b)]
+        (into params-x)
+        (into params-a)
+        (into params-b))))
+
 (defn ignore-respect-nulls [k [x]]
   (let [[sql & params] (format-expr x)]
     (into [(str sql " " (sql-kw k))] params)))
@@ -1938,15 +1949,8 @@
             (binding [*inline* true]
               (format-expr (if (ident? tz) (name tz) tz)))]
         (into [(str sql " AT TIME ZONE " tz-sql)] params)))
-    :between
-    (fn [_ [x a b]]
-      (let [[sql-x & params-x] (format-expr x {:nested true})
-            [sql-a & params-a] (format-expr a {:nested true})
-            [sql-b & params-b] (format-expr b {:nested true})]
-        (-> [(str sql-x " BETWEEN " sql-a " AND " sql-b)]
-            (into params-x)
-            (into params-a)
-            (into params-b))))
+    :between     #'between-fn
+    :not-between #'between-fn
     :case      #'case-clauses
     :case-expr #'case-clauses
     :cast
