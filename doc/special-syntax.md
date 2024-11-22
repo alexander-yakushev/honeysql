@@ -93,7 +93,7 @@ and a time zone name or identifier (can be a string, a symbol, or a keyword):
 The time zone name or identifier will be inlined (as a string) and therefore
 cannot be an expression.
 
-## between
+## between and not-between
 
 Accepts three arguments: an expression, a lower bound, and
 an upper bound:
@@ -101,6 +101,9 @@ an upper bound:
 ```clojure
 (sql/format-expr [:between :id 1 100])
 ;;=> ["id BETWEEN ? AND ?" 1 100]
+
+(sql/format-expr [:not-between :id 1 100])
+;;=> ["id NOT BETWEEN ? AND ?" 1 100]
 ```
 
 ## case
