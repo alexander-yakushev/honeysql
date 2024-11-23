@@ -62,3 +62,9 @@
 (deftest dotted-array-access-tests
   (is (= ["SELECT (a.b).c"]
          (sql/format '{select (((. (nest :a.b) :c)))}))))
+
+(deftest erase-from-test
+  (is (= ["ERASE FROM foo WHERE foo.id = ?" 42]
+         (-> {:erase-from :foo
+              :where [:= :foo.id 42]}
+             (sql/format)))))

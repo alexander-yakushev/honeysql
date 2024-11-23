@@ -60,7 +60,7 @@
    :select :select-distinct :select-distinct-on :select-top :select-distinct-top
    :distinct :expr :exclude :rename
    :into :bulk-collect-into
-   :insert-into :replace-into :update :delete :delete-from :truncate
+   :insert-into :replace-into :update :delete :delete-from :erase-from :truncate
    :columns :set :from :using
    :join-by
    :join :left-join :right-join :inner-join :outer-join :full-join
@@ -1638,6 +1638,7 @@
          :update          (check-where #'format-selector)
          :delete          (check-where #'format-selects)
          :delete-from     (check-where #'format-selector)
+         :erase-from      (check-where #'format-selector)
          :truncate        #'format-truncate
          :columns         #'format-columns
          :set             #'format-set-exprs
