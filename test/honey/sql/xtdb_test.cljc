@@ -68,3 +68,9 @@
          (-> {:erase-from :foo
               :where [:= :foo.id 42]}
              (sql/format)))))
+
+(deftest inline-record-body
+  (is (= ["{_id: 1, name: 'foo', info: {contact: [{loc: 'home', tel: '123'}, {loc: 'work', tel: '456'}]}}"]
+         (sql/format [:inline {:_id 1 :name "foo"
+                               :info {:contact [{:loc "home" :tel "123"}
+                                                {:loc "work" :tel "456"}]}}]))))

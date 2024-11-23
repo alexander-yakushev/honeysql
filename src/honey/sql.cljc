@@ -379,6 +379,14 @@
   (sqlize [x] (sql-kw x))
   #?(:cljs PersistentVector :default clojure.lang.IPersistentVector)
   (sqlize [x] (str "[" (join ", " (map p/sqlize) x) "]"))
+  #?(:cljs PersistentHashMap :default clojure.lang.IPersistentMap)
+  (sqlize [x] (str "{"
+                   (join ", " (map (fn [[k v]]
+                                     (str (format-entity k)
+                                          ": "
+                                          (p/sqlize v))))
+                         x)
+                   "}"))
   #?@(:clj [java.util.UUID
             ;; issue 385: quoted UUIDs for PostgreSQL/ANSI
             (sqlize [x] (str \' x \'))])
@@ -1991,7 +1999,7 @@
     :inline
     (fn [_ xs]
       (binding [*inline* true]
-        [(join " " (mapcat format-expr) xs)]))
+        [(join " " (mapcat #(format-expr % {:record true})) xs)]))
     :interval format-interval
     :join
     (fn [_ [e & js]]
@@ -2130,11 +2138,11 @@
   This is intended to be used when writing your own formatters to
   extend the DSL supported by HoneySQL."
   ([expr] (format-expr expr {}))
-  ([expr {:keys [nested] :as opts}]
+  ([expr {:keys [nested record] :as opts}]
    (cond (ident? expr)
          (format-var expr opts)
 
-         (map? expr)
+         (and (map? expr) (not record))
          (format-dsl expr (assoc opts :nested true))
 
          (sequential? expr)
