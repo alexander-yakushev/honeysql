@@ -63,6 +63,7 @@
 
 (defn test "Run basic tests." [opts]
   (run-task [:test :runner :1.11])
+  (run-task [:test :runner :cljs])
   opts)
 
 (defn- pom-template [version]

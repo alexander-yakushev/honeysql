@@ -368,6 +368,15 @@
       (keyword (name s)))
     s))
 
+(defn- inline-map [x]
+  (str "{"
+       (join ", " (map (fn [[k v]]
+                         (str (format-entity k)
+                              ": "
+                              (p/sqlize v))))
+             x)
+       "}"))
+
 (extend-protocol p/InlineValue
   nil
   (sqlize [_] "NULL")
@@ -379,19 +388,17 @@
   (sqlize [x] (sql-kw x))
   #?(:cljs PersistentVector :default clojure.lang.IPersistentVector)
   (sqlize [x] (str "[" (join ", " (map p/sqlize) x) "]"))
-  #?(:cljs PersistentHashMap :default clojure.lang.IPersistentMap)
-  (sqlize [x] (str "{"
-                   (join ", " (map (fn [[k v]]
-                                     (str (format-entity k)
-                                          ": "
-                                          (p/sqlize v))))
-                         x)
-                   "}"))
+  #?(:cljs PersistentArrayMap :default clojure.lang.IPersistentMap)
+  (sqlize [x] (inline-map x))
+  #?@(:cljs [PersistentHashMap
+             (sqlize [x] (inline-map x))])
   #?@(:clj [java.util.UUID
             ;; issue 385: quoted UUIDs for PostgreSQL/ANSI
             (sqlize [x] (str \' x \'))])
   #?(:cljs default :default Object)
-  (sqlize [x] (str x)))
+  (sqlize [x] (if (string? x)
+                (str \' (str/replace x "'" "''") \')
+                (str x))))
 
 (defn- sqlize-value [x] (p/sqlize x))
 
