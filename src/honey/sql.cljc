@@ -633,11 +633,18 @@
           [sql & params] (if (map? selectable)
                            (format-dsl selectable {:nested true})
                            (format-expr selectable))
+          *-qualifier (and (map? alias)
+                           (some #(contains? alias %)
+                                 [:exclude :rename
+                                  'exclude 'rename]))
           [sql' & params'] (when alias
-                             (if (sequential? alias)
-                              (let [[sqls params] (format-expr-list alias {:aliased true})]
-                                (into [(join " " sqls)] params))
-                              (format-selectable-dsl alias {:aliased true})))
+                             (cond (sequential? alias)
+                                   (let [[sqls params] (format-expr-list alias {:aliased true})]
+                                     (into [(join " " sqls)] params))
+                                   *-qualifier
+                                   (format-dsl alias)
+                                   :else
+                                   (format-selectable-dsl alias {:aliased true})))
           [sql'' & params''] (when temporal
                                (format-temporal temporal))]
 
@@ -646,8 +653,9 @@
                   (str " " sql''))
                 (when sql' ; alias
                   (str (if as
-                         (if (and (contains? *dialect* :as)
-                                  (not (:as *dialect*)))
+                         (if (or *-qualifier
+                                 (and (contains? *dialect* :as)
+                                   (not (:as *dialect*))))
                            " "
                            " AS ")
                          " ")

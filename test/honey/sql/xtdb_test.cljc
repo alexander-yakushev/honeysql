@@ -18,6 +18,20 @@
            (sql/format (-> (select :*) (exclude :_id)
                            (rename [:value :foo_value]
                                    [:a :b])
+                           (from :foo)))))
+    (is (= ["SELECT * EXCLUDE _id RENAME value AS foo_value, c.x FROM foo"]
+           (sql/format (-> (select [:* (-> (exclude :_id) (rename [:value :foo_value]))]
+                                   :c.x)
+                           (from :foo)))))
+    (is (= ["SELECT * EXCLUDE (_id, a) RENAME value AS foo_value, c.x FROM foo"]
+           (sql/format (-> (select [:* (-> (exclude :_id :a) (rename [:value :foo_value]))]
+                                   :c.x)
+                           (from :foo)))))
+    (is (= ["SELECT * EXCLUDE _id RENAME (value AS foo_value, a AS b), c.x FROM foo"]
+           (sql/format (-> (select [:* (-> (exclude :_id)
+                                           (rename [:value :foo_value]
+                                                   [:a :b]))]
+                                   :c.x)
                            (from :foo))))))
   (testing "select, nest_one, nest_many"
     (is (= ["SELECT a._id, NEST_ONE (SELECT * FROM foo AS b WHERE b_id = a._id) FROM bar AS a"]
