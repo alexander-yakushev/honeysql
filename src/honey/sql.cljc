@@ -369,14 +369,14 @@
       (keyword (name s)))
     s))
 
-(defn- inline-map [x]
-  (str "{"
+(defn- inline-map [x & [open close]]
+  (str (or open "{")
        (join ", " (map (fn [[k v]]
                          (str (format-entity k)
                               ": "
                               (p/sqlize v))))
              x)
-       "}"))
+       (or close "}")))
 
 (extend-protocol p/InlineValue
   nil
@@ -1929,6 +1929,10 @@
         (into params-a)
         (into params-b))))
 
+(defn- object-record-literal
+  [k [x]]
+  [(str (sql-kw k) " " (inline-map x "(" ")"))])
+
 (defn ignore-respect-nulls [k [x]]
   (let [[sql & params] (format-expr x)]
     (into [(str sql " " (sql-kw k))] params)))
@@ -2057,6 +2061,8 @@
     (fn [_ [x]]
       (let [[sql & params] (format-expr x {:nested true})]
         (into [(str "NOT " sql)] params)))
+    :object #'object-record-literal
+    :record #'object-record-literal
     :order-by
     (fn [k [e & qs]]
       (let [[sql-e & params-e] (format-expr e)

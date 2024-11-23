@@ -93,3 +93,18 @@
            (sql/format {:insert-into [:foo
                                       {:records [{:_id 1 :name "cat"}
                                                  {:_id 2 :name "dog"}]}]})))))
+
+(deftest object-record-expr
+  (testing "object literal"
+    (is (= ["SELECT OBJECT (_id: 1, name: 'foo')"]
+           (sql/format {:select [[[:object {:_id 1 :name "foo"}]]]})))
+    (is (= ["SELECT OBJECT (_id: 1, name: 'foo')"]
+           (sql/format '{select (((:object {:_id 1 :name "foo"})))}))))
+  (testing "record literal"
+    (is (= ["SELECT RECORD (_id: 1, name: 'foo')"]
+           (sql/format {:select [[[:record {:_id 1 :name "foo"}]]]})))
+    (is (= ["SELECT RECORD (_id: 1, name: 'foo')"]
+           (sql/format '{select (((:record {:_id 1 :name "foo"})))}))))
+  (testing "inline map literal"
+    (is (= ["SELECT {_id: 1, name: 'foo'}"]
+           (sql/format {:select [[[:inline {:_id 1 :name "foo"}]]]})))))
