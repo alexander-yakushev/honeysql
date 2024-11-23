@@ -592,6 +592,15 @@
   [& args]
   (generic :delete-from args))
 
+(defn erase-from
+  "For erasing (hard delete) from a single table (XTDB).
+  Accepts a single table name to erase from.
+
+  (-> (erase-from :films) (where [:= :id 1]))"
+  {:arglists '([table])}
+  [& args]
+  (generic :erase-from args))
+
 (defn truncate
   "Accepts a single table name to truncate."
   {:arglists '([table])}
