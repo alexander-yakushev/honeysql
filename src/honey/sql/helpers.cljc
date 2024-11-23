@@ -498,6 +498,11 @@
   [& args]
   (generic :select-distinct-top args))
 
+(defn records
+  "Produces RECORDS {...}, {...}, ..."
+  [& args]
+  (generic :records args))
+
 (defn distinct
   "Like `select-distinct` but produces DISTINCT..."
   [& args]

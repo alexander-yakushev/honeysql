@@ -74,3 +74,22 @@
          (sql/format [:inline {:_id 1 :name "foo"
                                :info {:contact [{:loc "home" :tel "123"}
                                                 {:loc "work" :tel "456"}]}}]))))
+
+(deftest records-statement
+  (testing "auto-lift maps"
+    (is (= ["RECORDS ?, ?" {:_id 1 :name "cat"} {:_id 2 :name "dog"}]
+           (sql/format {:records [{:_id 1 :name "cat"}
+                                  {:_id 2 :name "dog"}]}))))
+  (testing "explicit inline"
+    (is (= ["RECORDS {_id: 1, name: 'cat'}, {_id: 2, name: 'dog'}"]
+           (sql/format {:records [[:inline {:_id 1 :name "cat"}]
+                                  [:inline {:_id 2 :name "dog"}]]}))))
+  (testing "insert with records"
+    (is (= ["INSERT INTO foo RECORDS {_id: 1, name: 'cat'}, {_id: 2, name: 'dog'}"]
+           (sql/format {:insert-into [:foo
+                                      {:records [[:inline {:_id 1 :name "cat"}]
+                                                 [:inline {:_id 2 :name "dog"}]]}]})))
+    (is (= ["INSERT INTO foo RECORDS ?, ?" {:_id 1 :name "cat"} {:_id 2 :name "dog"}]
+           (sql/format {:insert-into [:foo
+                                      {:records [{:_id 1 :name "cat"}
+                                                 {:_id 2 :name "dog"}]}]})))))
