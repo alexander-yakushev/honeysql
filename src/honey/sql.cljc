@@ -1933,6 +1933,23 @@
   [k [x]]
   [(str (sql-kw k) " " (inline-map x "(" ")"))])
 
+(defn- get-in-navigation
+  "[:get-in expr key-or-index1 key-or-index2 ...]"
+  [_ [expr & kix]]
+  (let [[sql & params] (format-expr expr)
+        [sqls params']
+        (reduce-sql (map #(cond (number? %)
+                                [(str "[" % "]")]
+                                (ident? %)
+                                [(str "." (format-entity %))]
+                                :else
+                                (let [[sql' & params'] (format-expr %)]
+                                  (cons (str "[" sql' "]") params')))
+                         kix))]
+    (-> [(str "(" sql ")" (join "" sqls))]
+        (into params)
+        (into params'))))
+
 (defn ignore-respect-nulls [k [x]]
   (let [[sql & params] (format-expr x)]
     (into [(str sql " " (sql-kw k))] params)))
@@ -2023,6 +2040,7 @@
             (into params-p)
             (into params-e))))
     :filter expr-clause-pairs
+    :get-in #'get-in-navigation
     :ignore-nulls ignore-respect-nulls
     :inline
     (fn [_ xs]

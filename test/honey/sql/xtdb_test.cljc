@@ -108,3 +108,13 @@
   (testing "inline map literal"
     (is (= ["SELECT {_id: 1, name: 'foo'}"]
            (sql/format {:select [[[:inline {:_id 1 :name "foo"}]]]})))))
+
+(deftest navigation-dot-index
+  (is (= ["SELECT (a.b).c[1].d"]
+         (sql/format '{select (((get-in a.b c 1 d)))})))
+  (is (= ["SELECT (a.b).c[?].d" 1]
+         (sql/format '{select (((get-in a.b c (lift 1) d)))})))
+  (is (= ["SELECT (a.b).c[?].d" 1]
+         (sql/format '{select (((get-in (. a b) c (lift 1) d)))})))
+  (is (= ["SELECT (OBJECT (_id: 1, b: 'thing').b).c[?].d" 1]
+         (sql/format '{select (((get-in (. (object {_id 1 b "thing"}) b) c (lift 1) d)))}))))
