@@ -1,28 +1,12 @@
 ;; copyright (c) 2020-2024 sean corfield, all rights reserved
 
 (ns honey.sql.xtdb-test
-  (:require [clojure.test :refer [deftest is testing use-fixtures]]
+  (:require [clojure.test :refer [deftest is testing]]
             [honey.sql :as sql]
             [honey.sql.helpers :as h
              :refer [select exclude rename from where]]))
 
-(use-fixtures :once (fn [t]
-                      (try
-                        (sql/set-dialect! :xtdb)
-                        (t)
-                        (finally
-                          (sql/set-dialect! :ansi)))))
-
 (deftest select-tests
-  (testing "qualified columns"
-    (is (= ["SELECT \"foo\".\"bar\", \"baz/quux\""]
-           (sql/format {:select [:foo.bar :baz/quux]} {:quoted true})))
-    (is (= ["SELECT \"foo\".\"bar\", \"baz/quux\""]
-           (sql/format {:select [:foo.bar :baz/quux]} {:dialect :xtdb})))
-    (is (= ["SELECT foo.bar, \"baz/quux\""]
-           (sql/format {:select [:foo.bar :baz/quux]})))
-    (is (= ["SELECT foo.bar, baz/quux"]
-           (sql/format {:select [:foo.bar :baz/quux]} {:quoted false}))))
   (testing "select, exclude, rename"
     (is (= ["SELECT * EXCLUDE _id RENAME value AS foo_value FROM foo"]
            (sql/format (-> (select :*) (exclude :_id) (rename [:value :foo_value])

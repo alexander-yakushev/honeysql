@@ -119,10 +119,7 @@
                :nrql      {:quote    #(strop "`" % "`")
                            :col-fn   #(if (keyword? %) (subs (str %) 1) (str %))
                            :parts-fn vector}
-               :oracle    {:quote    #(strop "\"" % "\"") :as false}
-               :xtdb      {:quote    #(strop "\"" % "\"")
-                           :col-fn   #(if (keyword? %) (subs (str %) 1) (str %))
-                           :parts-fn #(str/split % #"\.")}})))
+               :oracle    {:quote    #(strop "\"" % "\"") :as false}})))
 
 ; should become defonce
 (def ^:private default-dialect (atom (:ansi @dialects)))
