@@ -55,6 +55,7 @@
    :refresh-materialized-view
    :create-index
    ;; then SQL clauses in priority order:
+   :setting
    :raw :nest :with :with-recursive :intersect :union :union-all :except :except-all
    :table
    :select :select-distinct :select-distinct-on :select-top :select-distinct-top
@@ -1585,6 +1586,25 @@
       (into [(str (sql-kw k) " " (join ", " sqls))] params))
     (format-records k [args])))
 
+(defn- format-setting
+  [k args]
+  (if (and (sequential? args) (ident? (first args)))
+    (format-setting k [args])
+    (let [[sqls params]
+          (reduce-sql
+           (map (fn [arg]
+                  (let [[sqls params]
+                        (reduce-sql (map (fn [x]
+                                           (if (ident? x)
+                                             [(if (str/ends-with? (name x) "-time")
+                                                (format-fn-name x)
+                                                (sql-kw x))]
+                                             (format-expr x)))
+                                         arg))]
+                    (into [(join " " sqls)] params)))
+                args))]
+      (into [(str (sql-kw k) " " (join ", " sqls))] params))))
+
 (defn- check-where
   "Given a formatter function, performs a pre-flight check that there is
   a non-empty where clause if at least basic checking is enabled."
@@ -1638,6 +1658,7 @@
          :drop-materialized-view #'format-drop-items
          :refresh-materialized-view (fn [_ x] (format-create :refresh :materialized-view x nil))
          :create-index    #'format-create-index
+         :setting         #'format-setting
          :raw             (fn [_ x] (raw-render x))
          :nest            (fn [_ x]
                             (let [[sql & params] (format-dsl x {:nested true})]

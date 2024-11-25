@@ -399,6 +399,11 @@
   [& args]
   (generic :create-index args))
 
+(defn setting
+  "Accepts one or more time settings for a query."
+  [& args]
+  (generic :setting args))
+
 (defn with
   "Accepts one or more CTE definitions.
 
