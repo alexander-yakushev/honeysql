@@ -44,8 +44,10 @@
                          from ((bar a))})))))
 
 (deftest dotted-array-access-tests
-  (is (= ["SELECT (a.b).c"]
-         (sql/format '{select (((. (nest :a.b) :c)))}))))
+  (is (= ["SELECT (a.b).c"] ; old, partial support:
+         (sql/format '{select (((. (nest :a.b) :c)))})))
+  (is (= ["SELECT (a.b).c"] ; new, complete support:
+         (sql/format '{select (((:get-in :a.b :c)))}))))
 
 (deftest erase-from-test
   (is (= ["ERASE FROM foo WHERE foo.id = ?" 42]
