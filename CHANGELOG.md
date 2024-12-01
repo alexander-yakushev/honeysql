@@ -2,6 +2,7 @@
 
 * 2.6.next in progress
   * Address [#555](https://github.com/seancorfield/honeysql/issues/555) by supporting `SETTING` clause for XTDB.
+  * Replace `assert` calls with proper validation, throwing `ex-info` on failure (like other existing validation in HoneySQL).
   * Experimental `:xtdb` dialect removed (since XTDB no longer supports qualified column names).
 
 * 2.6.1230 -- 2024-11-23
