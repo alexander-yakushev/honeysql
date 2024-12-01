@@ -2422,7 +2422,8 @@
   [clause formatter before]
   (let [clause (sym->kw clause)
         before (sym->kw before)]
-    (assert (keyword? clause))
+    (when-not (keyword? clause)
+      (throw (ex-info "The clause must be a keyword or symbol" {:clause clause})))
     (let [k (sym->kw formatter)
           f (if (keyword? k)
               (get @clause-format k)
@@ -2489,7 +2490,8 @@
   DSL."
   [function formatter]
   (let [function (sym->kw function)]
-    (assert (keyword? function))
+    (when-not (keyword? function)
+      (throw (ex-info "The function must be a keyword or symbol" {:function function})))
     (let [k (sym->kw formatter)
           f (if (keyword? k)
               (get @special-syntax k)
@@ -2510,7 +2512,8 @@
   construct the DSL)."
   [op & {:keys [ignore-nil]}]
   (let [op (sym->kw op)]
-    (assert (keyword? op))
+    (when-not (keyword? op)
+      (throw (ex-info "The operator must be a keyword or symbol" {:operator op})))
     (swap! infix-ops conj op)
     (when ignore-nil
       (swap! op-ignore-nil conj op))))
