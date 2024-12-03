@@ -4,6 +4,7 @@
   * Address [#555](https://github.com/seancorfield/honeysql/issues/555) by supporting `SETTING` clause for XTDB.
   * Replace `assert` calls with proper validation, throwing `ex-info` on failure (like other existing validation in HoneySQL).
   * Experimental `:xtdb` dialect removed (since XTDB no longer supports qualified column names).
+  * Update dev/test deps.
 
 * 2.6.1230 -- 2024-11-23
   * Fix [#553](https://github.com/seancorfield/honeysql/issues/553) by adding `:not-between` as special syntax via PR [#554](https://github.com/seancorfield/honeysql/pull/554) [@plooney81](https://github.com/plooney81)
