@@ -12,7 +12,7 @@
                      bulk-collect-into
                      cross-join do-update-set drop-column drop-index drop-table
                      filter from full-join
-                     group-by having insert-into
+                     group-by having insert-into replace-into
                      join-by join lateral left-join limit offset on-conflict
                      on-duplicate-key-update
                      order-by over partition-by refresh-materialized-view
@@ -835,7 +835,10 @@
          ["INSERT INTO transport (id, name) SELECT * FROM cars"]))
   ;; three arguments with an alias and columns:
   (is (= (sql/format (insert-into '(transport t) '(id, name) '{select (*) from (cars)}))
-         ["INSERT INTO transport AS t (id, name) SELECT * FROM cars"])))
+         ["INSERT INTO transport AS t (id, name) SELECT * FROM cars"]))
+  ;; and again with replace-into:
+  (is (= (sql/format (replace-into '(transport t) '(id, name) '{select (*) from (cars)}))
+         ["REPLACE INTO transport AS t (id, name) SELECT * FROM cars"])))
 
 ;; these tests are adapted from Cam Saul's PR #283
 

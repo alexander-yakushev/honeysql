@@ -670,9 +670,9 @@ user=> (sql/format '{select * bulk-collect-into [arrv 100] from mytable})
 ["SELECT * BULK COLLECT INTO arrv LIMIT ? FROM mytable" 100]
 ```
 
-## insert-into, replace-into
+## insert-into, replace-into, patch-into
 
-There are three use cases with `:insert-into`.
+There are three use cases with `:insert-into` etc.
 
 The first case takes just a table specifier (either a
 table name or a table/alias pair),
@@ -689,6 +689,10 @@ or a table/column specifier and a SQL query.
 For the first and second cases, you'll use the `:values` clause
 to specify rows of values to insert. See [**values**](#values) below
 for more detail on the `:values` clause.
+
+`:patch-into` is only supported by XTDB but is
+part of HoneySQL's "core" dialect anyway. It produces a `PATCH INTO`
+statement but otherwise has identical syntax to `:insert-into`.
 
 `:replace-into` is only supported by MySQL and SQLite but is
 part of HoneySQL's "core" dialect anyway. It produces a `REPLACE INTO`
@@ -794,7 +798,7 @@ You can also `UPDATE .. FROM (VALUES ..) ..` where you might also need `:composi
 ["UPDATE table SET a = v.a FROM (VALUES (?, ?, ?), (?, ?, ?)) AS v (a, b, c) WHERE (x = v.b) AND (y > v.c)" 1 2 3 4 5 6]
 ```
 
-## delete, delete-from
+## delete, delete-from, erase-from
 
 `:delete-from` is the simple use case here, accepting just a
 SQL entity (table name). `:delete` allows for deleting from
@@ -810,6 +814,10 @@ user=> (sql/format {:delete [:order :item]
                     :where [:= :item.id 42]})
 ["DELETE order, item FROM order INNER JOIN item ON order.item_id = item.id WHERE item.id = ?" 42]
 ```
+
+`:erase-from` is only supported by XTDB and produces an `ERASE FROM`
+statement but otherwise has identical syntax to `:delete-from`. It
+is a "hard" delete as opposed to a temporal delete.
 
 ## truncate
 

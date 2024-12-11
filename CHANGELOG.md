@@ -1,6 +1,7 @@
 # Changes
 
 * 2.6.next in progress
+  * Address [#558](https://github.com/seancorfield/honeysql/issues/558) by adding `:patch-into` (and `patch-into` helper) for XTDB (but in core).
   * Address [#555](https://github.com/seancorfield/honeysql/issues/555) by supporting `SETTING` clause for XTDB.
   * Replace `assert` calls with proper validation, throwing `ex-info` on failure (like other existing validation in HoneySQL).
   * Experimental `:xtdb` dialect removed (since XTDB no longer supports qualified column names).

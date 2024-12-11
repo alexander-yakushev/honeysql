@@ -504,9 +504,10 @@
   (generic :select-distinct-top args))
 
 (defn records
-  "Produces RECORDS {...}, {...}, ..."
+  "Produces RECORDS {...}, {...}, ...
+  Like `values` so it accepts a collection of maps."
   [& args]
-  (generic :records args))
+  (generic-1 :records args))
 
 (defn distinct
   "Like `select-distinct` but produces DISTINCT..."
@@ -541,6 +542,14 @@
   [& args]
   (generic :bulk-collect-into args))
 
+(defn- stuff-into [k args]
+  (let [[data & args :as args']
+        (if (map? (first args)) args (cons {} args))
+        [table cols statement] args]
+    (if (and (sequential? cols) (map? statement))
+      (generic k [data [table cols] statement])
+      (generic k args'))))
+
 (defn insert-into
   "Accepts a table name or a table/alias pair. That
   can optionally be followed by a collection of
@@ -556,12 +565,20 @@
                (-> (select :*) (from :other)))"
   {:arglists '([table] [table cols] [table statement] [table cols statement])}
   [& args]
-  (let [[data & args :as args']
-        (if (map? (first args)) args (cons {} args))
-        [table cols statement] args]
-    (if (and (sequential? cols) (map? statement))
-      (generic :insert-into [data [table cols] statement])
-      (generic :insert-into args'))))
+  (stuff-into :insert-into args))
+
+(defn patch-into
+  "Accepts a table name or a table/alias pair. That
+  can optionally be followed by a collection of
+  column names. That can optionally be followed by
+  a (select) statement clause.
+
+  The arguments are identical to insert-into.
+  The PATCH INTO statement is only supported by
+  XTDB."
+  {:arglists '([table] [table cols] [table statement] [table cols statement])}
+  [& args]
+  (stuff-into :patch-into args))
 
 (defn replace-into
   "Accepts a table name or a table/alias pair. That
@@ -574,7 +591,7 @@
   MySQL and SQLite."
   {:arglists '([table] [table cols] [table statement] [table cols statement])}
   [& args]
-  (apply insert-into args))
+  (stuff-into :replace-into args))
 
 (defn update
   "Accepts either a table name or a table/alias pair.

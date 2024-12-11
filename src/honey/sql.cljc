@@ -62,7 +62,7 @@
    :records
    :distinct :expr :exclude :rename
    :into :bulk-collect-into
-   :insert-into :replace-into :update :delete :delete-from :erase-from :truncate
+   :insert-into :patch-into :replace-into :update :delete :delete-from :erase-from :truncate
    :columns :set :from :using
    :join-by
    :join :left-join :right-join :inner-join :outer-join :full-join
@@ -792,6 +792,7 @@
 (defn- format-columns [k xs]
   (if (and (= :columns k)
            (or (contains-clause? :insert-into)
+               (contains-clause? :patch-into)
                (contains-clause? :replace-into)))
     []
     (let [[sqls params] (format-expr-list xs {:drop-ns true})]
@@ -1213,6 +1214,7 @@
           ;; [{:a 1 :b 2 :c 3}]
           (let [[cols cols-sql]
                 (columns-from-values xs (or (contains-clause? :insert-into)
+                                            (contains-clause? :patch-into)
                                             (contains-clause? :replace-into)
                                             (contains-clause? :columns)))
                 [sqls params]
@@ -1684,6 +1686,7 @@
          :into            #'format-select-into
          :bulk-collect-into #'format-select-into
          :insert-into     #'format-insert
+         :patch-into      #'format-insert
          :replace-into    #'format-insert
          :update          (check-where #'format-selector)
          :delete          (check-where #'format-selects)

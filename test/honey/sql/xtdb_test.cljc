@@ -53,6 +53,10 @@
   (is (= ["ERASE FROM foo WHERE foo.id = ?" 42]
          (-> {:erase-from :foo
               :where [:= :foo.id 42]}
+             (sql/format))))
+  (is (= ["ERASE FROM foo WHERE foo.id = ?" 42]
+         (-> (h/erase-from :foo)
+             (h/where [:= :foo.id 42])
              (sql/format)))))
 
 (deftest inline-record-body
@@ -79,6 +83,21 @@
            (sql/format {:insert-into [:foo
                                       {:records [{:_id 1 :name "cat"}
                                                  {:_id 2 :name "dog"}]}]})))))
+
+(deftest patch-statement
+  (testing "patch with records"
+    (is (= ["PATCH INTO foo RECORDS {_id: 1, name: 'cat'}, {_id: 2, name: 'dog'}"]
+           (sql/format {:patch-into [:foo
+                                     {:records [[:inline {:_id 1 :name "cat"}]
+                                                [:inline {:_id 2 :name "dog"}]]}]})))
+    (is (= ["PATCH INTO foo RECORDS ?, ?" {:_id 1 :name "cat"} {:_id 2 :name "dog"}]
+           (sql/format {:patch-into [:foo
+                                     {:records [{:_id 1 :name "cat"}
+                                                {:_id 2 :name "dog"}]}]})))
+    (is (= ["PATCH INTO foo RECORDS ?, ?" {:_id 1 :name "cat"} {:_id 2 :name "dog"}]
+           (sql/format (h/patch-into :foo
+                                     (h/records [{:_id 1 :name "cat"}
+                                                 {:_id 2 :name "dog"}])))))))
 
 (deftest object-record-expr
   (testing "object literal"
