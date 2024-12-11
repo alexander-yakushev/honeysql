@@ -16,7 +16,8 @@
               ;;"doc/operator-reference.md"
               "doc/options.md"
               "doc/postgresql.md"
-              "doc/special-syntax.md"]
+              "doc/special-syntax.md"
+              "doc/xtdb.md"]
         regen-reason (if (not (fs/exists? success-marker))
                        "a previous successful gen result not found"
                        (let [newer-thans (fs/modified-since target

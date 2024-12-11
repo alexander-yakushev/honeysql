@@ -415,7 +415,8 @@ If you want to use a dialect _and_ use the default quoting strategy (automatical
 ```
 
 Out of the box, as part of the extended ANSI SQL support,
-HoneySQL supports quite a few [PostgreSQL extensions](postgresql.md).
+HoneySQL supports quite a few [PostgreSQL extensions](postgresql.md)
+and [XTDB extensions](xtdb.md).
 
 > Note: the [nilenso/honeysql-postgres](https://github.com/nilenso/honeysql-postgres) library which provided PostgreSQL support for HoneySQL 1.x does not work with HoneySQL 2.x. However, HoneySQL 2.x includes all of the functionality from that library (up to 0.4.112) out of the box!
 

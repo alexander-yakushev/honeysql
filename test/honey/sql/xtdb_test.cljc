@@ -47,7 +47,9 @@
   (is (= ["SELECT (a.b).c"] ; old, partial support:
          (sql/format '{select (((. (nest :a.b) :c)))})))
   (is (= ["SELECT (a.b).c"] ; new, complete support:
-         (sql/format '{select (((:get-in :a.b :c)))}))))
+         (sql/format '{select (((:get-in :a.b :c)))})))
+  (is (= ["SELECT (a).b.c"] ; the first expression is always parenthesized:
+         (sql/format '{select (((:get-in :a :b :c)))}))))
 
 (deftest erase-from-test
   (is (= ["ERASE FROM foo WHERE foo.id = ?" 42]
@@ -76,22 +78,26 @@
                                   [:inline {:_id 2 :name "dog"}]]}))))
   (testing "insert with records"
     (is (= ["INSERT INTO foo RECORDS {_id: 1, name: 'cat'}, {_id: 2, name: 'dog'}"]
-           (sql/format {:insert-into [:foo
-                                      {:records [[:inline {:_id 1 :name "cat"}]
-                                                 [:inline {:_id 2 :name "dog"}]]}]})))
+           (sql/format {:insert-into :foo
+                        :records [[:inline {:_id 1 :name "cat"}]
+                                  [:inline {:_id 2 :name "dog"}]]})))
+    (is (= ["INSERT INTO foo RECORDS {_id: 1, name: 'cat'}, {_id: 2, name: 'dog'}"]
+           (sql/format {:insert-into :foo
+                        :records [[:inline {:_id 1 :name "cat"}]
+                                  [:inline {:_id 2 :name "dog"}]]})))
     (is (= ["INSERT INTO foo RECORDS ?, ?" {:_id 1 :name "cat"} {:_id 2 :name "dog"}]
-           (sql/format {:insert-into [:foo
+           (sql/format {:insert-into [:foo ; as a sub-clause
                                       {:records [{:_id 1 :name "cat"}
                                                  {:_id 2 :name "dog"}]}]})))))
 
 (deftest patch-statement
   (testing "patch with records"
     (is (= ["PATCH INTO foo RECORDS {_id: 1, name: 'cat'}, {_id: 2, name: 'dog'}"]
-           (sql/format {:patch-into [:foo
-                                     {:records [[:inline {:_id 1 :name "cat"}]
-                                                [:inline {:_id 2 :name "dog"}]]}]})))
+           (sql/format {:patch-into [:foo]
+                        :records [[:inline {:_id 1 :name "cat"}]
+                                  [:inline {:_id 2 :name "dog"}]]})))
     (is (= ["PATCH INTO foo RECORDS ?, ?" {:_id 1 :name "cat"} {:_id 2 :name "dog"}]
-           (sql/format {:patch-into [:foo
+           (sql/format {:patch-into [:foo ; as a sub-clause
                                      {:records [{:_id 1 :name "cat"}
                                                 {:_id 2 :name "dog"}]}]})))
     (is (= ["PATCH INTO foo RECORDS ?, ?" {:_id 1 :name "cat"} {:_id 2 :name "dog"}]

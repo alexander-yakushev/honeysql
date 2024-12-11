@@ -1,6 +1,8 @@
 # Other Databases
 
-There is a dedicated section for [PostgreSQL Support](postgres.md).
+There are dedicated sections for [New Relic Query Language Support](nrql.md),
+[PostgreSQL Support](postgres.md), and
+[XTDB Support](xtdb.md).
 This section provides hints and tips for generating SQL for other
 databases.
 

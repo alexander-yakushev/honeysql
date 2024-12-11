@@ -59,7 +59,6 @@
    :raw :nest :with :with-recursive :intersect :union :union-all :except :except-all
    :table
    :select :select-distinct :select-distinct-on :select-top :select-distinct-top
-   :records
    :distinct :expr :exclude :rename
    :into :bulk-collect-into
    :insert-into :patch-into :replace-into :update :delete :delete-from :erase-from :truncate
@@ -71,7 +70,7 @@
    ;; NRQL extension:
    :facet
    :window :partition-by
-   :order-by :limit :offset :fetch :for :lock :values
+   :order-by :limit :offset :fetch :for :lock :values :records
    :on-conflict :on-constraint :do-nothing :do-update-set :on-duplicate-key-update
    :returning
    :with-data
@@ -1678,7 +1677,6 @@
          :select-distinct-on #'format-selects-on
          :select-top      #'format-select-top
          :select-distinct-top #'format-select-top
-         :records         #'format-records
          :exclude         #'format-selects
          :rename          #'format-selects
          :distinct        (fn [k xs] (format-selects k   [[xs]]))
@@ -1727,6 +1725,7 @@
          :for             #'format-lock-strength
          :lock            #'format-lock-strength
          :values          #'format-values
+         :records         #'format-records
          :on-conflict     #'format-on-conflict
          :on-constraint   #'format-selector
          :do-nothing      (fn [k _] (vector (sql-kw k)))
