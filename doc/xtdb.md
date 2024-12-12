@@ -46,13 +46,23 @@ user=> (sql/format '{from foo where (= status "active")})
 You can also `SELECT *` and then exclude columns and/or rename columns.
 
 ```clojure
-user=> (sql/format '{select ((* {exclude _id rename ((title, name))}))})
+user=> (sql/format {:select [[:* {:exclude :_id :rename [[:title, :name]]}]]})
 ["SELECT * EXCLUDE _id RENAME title AS name"]
 user=> (sql/format '{select ((a.* {exclude _id})
                              (b.* {rename ((title, name))}))
                      from ((foo a))
                      join ((bar b) (= a._id b.foo_id))})
 ["SELECT a.* EXCLUDE _id, b.* RENAME title AS name FROM foo AS a INNER JOIN bar AS b ON a._id = b.foo_id"]
+```
+
+`:exclude` can accept a single column, or a sequence of columns.
+`:rename` accepts a sequence of pairs (column name, new name).
+
+```clojure
+user=> (sql/format {:select [[:* {:exclude [:_id :upc]
+                                  :rename [[:title, :name]
+                                           [:price, :cost]]}]]})
+["SELECT * EXCLUDE (_id, upc) RENAME (title AS name, price AS cost)"]
 ```
 
 ## Nested Sub-Queries
@@ -103,6 +113,13 @@ user=> (sql/format {:select [[[:record {:_id 1 :status "active"}]]]})
 ["SELECT RECORD (_id: 1, status: 'active')"]
 ```
 
+A third option is to use `:inline` with a hash map:
+
+```clojure
+user=> (sql/format {:select [[[:inline {:_id 1 :status "active"}]]]})
+["SELECT {_id: 1, status: 'active'}"]
+```
+
 ## Object Navigation Expressions
 
 In order to deal with nested documents, XTDB provides syntax to navigate
@@ -144,9 +161,9 @@ See [XTDB's Top-level queries documentation](https://docs.xtdb.com/reference/mai
 Here's one fairly complex example:
 
 ```clojure
-user=> (sql/format {:setting [[:basis-to [:inline :DATE "2024-11-24"]]
+user=> (sql/format {:setting [[:snapshot-time :to [:inline :DATE "2024-11-24"]]
                               [:default :valid-time :to :between [:inline :DATE "2022"] :and [:inline :DATE "2023"]]]})
-["SETTING BASIS TO DATE '2024-11-24', DEFAULT VALID_TIME TO BETWEEN DATE '2022' AND DATE '2023'"]
+["SETTING SNAPSHOT_TIME TO DATE '2024-11-24', DEFAULT VALID_TIME TO BETWEEN DATE '2022' AND DATE '2023'"]
 ```
 
 Table references (e.g., in a `FROM` clause) can also have temporal qualifiers.

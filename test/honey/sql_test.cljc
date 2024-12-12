@@ -1403,15 +1403,15 @@ ORDER BY id = ? DESC
   (testing "setting default time"
     (is (= ["SETTING DEFAULT SYSTEM_TIME AS OF DATE '2024-11-24'"]
            (sut/format {:setting [:default :system-time :as-of [:inline :DATE "2024-11-24"]]})))
-    (is (= ["SETTING BASIS TO DATE '2024-11-24', DEFAULT VALID_TIME TO BETWEEN DATE '2022' AND DATE '2023'"]
-           (sut/format {:setting [[:basis-to [:inline :DATE "2024-11-24"]]
+    (is (= ["SETTING SNAPSHOT_TIME TO DATE '2024-11-24', DEFAULT VALID_TIME TO BETWEEN DATE '2022' AND DATE '2023'"]
+           (sut/format {:setting [[:snapshot-time :to [:inline :DATE "2024-11-24"]]
                                   [:default :valid-time :to :between [:inline :DATE "2022"] :and [:inline :DATE "2023"]]]})))
     (is (= ["SETTING DEFAULT SYSTEM_TIME AS OF DATE '2024-11-24' SELECT * FROM table"]
            (sut/format (-> (h/setting :default :system-time :as-of [:inline :DATE "2024-11-24"])
                            (h/select :*)
                            (h/from :table)))))
-    (is (= ["SETTING BASIS TO DATE '2024-11-24', DEFAULT VALID_TIME TO BETWEEN DATE '2022' AND DATE '2023' SELECT * FROM table"]
-           (sut/format (-> (h/setting [:basis-to [:inline :DATE "2024-11-24"]]
+    (is (= ["SETTING SNAPSHOT_TIME TO DATE '2024-11-24', DEFAULT VALID_TIME TO BETWEEN DATE '2022' AND DATE '2023' SELECT * FROM table"]
+           (sut/format (-> (h/setting [:snapshot-time :to [:inline :DATE "2024-11-24"]]
                                       [:default :valid-time :to :between [:inline :DATE "2022"] :and [:inline :DATE "2023"]])
                            (h/select :*)
                            (h/from :table)))))))
