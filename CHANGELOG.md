@@ -1,6 +1,6 @@
 # Changes
 
-* 2.6.next in progress
+* 2.6.1243 -- 2024-12-13
   * Address [#558](https://github.com/seancorfield/honeysql/issues/558) by adding `:patch-into` (and `patch-into` helper) for XTDB (but in core).
   * Address [#556](https://github.com/seancorfield/honeysql/issues/556) by adding an XTDB section to the documentation with examples.
   * Address [#555](https://github.com/seancorfield/honeysql/issues/555) by supporting `SETTING` clause for XTDB.
@@ -51,7 +51,7 @@
   * Address [#524](https://github.com/seancorfield/honeysql/issues/524) by adding example of `{:nest ..}` in `:union` clause reference docs.
   * Address [#523](https://github.com/seancorfield/honeysql/issues/523) by expanding examples in README **Functions** to show aliases.
   * Address [#522](https://github.com/seancorfield/honeysql/issues/522) by supporting metadata on table specifications in `:from` and `:join` clauses to provide index hints (SQL Server).
-  * ~Address [#521](https://github.com/seancorfield/honeysql/issues/521) by adding initial experimental support for an XTDB dialect.~ _[This was removed in 2.6.next since XTDB no longer supports qualified column names]_
+  * ~Address [#521](https://github.com/seancorfield/honeysql/issues/521) by adding initial experimental support for an XTDB dialect.~ _[This was removed in 2.6.1243 since XTDB no longer supports qualified column names]_
   * Address [#520](https://github.com/seancorfield/honeysql/issues/520) by expanding how `:inline` works, to support a sequence of arguments.
   * Fix [#518](https://github.com/seancorfield/honeysql/issues/518) by moving temporal clause before alias.
   * Address [#495](https://github.com/seancorfield/honeysql/issues/495) by adding `formatv` macro (`.clj` only!) -- and removing the experimental `formatf` function (added for discussion in 2.4.1045).
