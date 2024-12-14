@@ -112,7 +112,8 @@
                 (assoc m k (assoc v :dialect k)))
               {}
               {:ansi      {:quote #(strop "\"" % "\"")}
-               :sqlserver {:quote #(strop "[" % "]")}
+               :sqlserver {:quote #(strop "[" % "]")
+                           :auto-lift-boolean true}
                :mysql     {:quote #(strop "`" % "`")
                            :clause-order-fn
                            #(add-clause-before % :set :where)}
@@ -2233,7 +2234,9 @@
                (into [(str "(" (join ", " sqls) ")")] params))))
 
          (boolean? expr)
-         [(upper-case (str expr))]
+         (if (:auto-lift-boolean *dialect*)
+           ["?" expr]
+           [(upper-case (str expr))])
 
          (nil? expr)
          ["NULL"]

@@ -22,6 +22,8 @@
          (sut/format-expr [:is :id nil])))
   (is (= ["id = TRUE"]
          (sut/format-expr [:= :id true])))
+  (is (= ["[id] = ?" true]
+         (sut/format [:= :id true] {:dialect :sqlserver})))
   (is (= ["id IS TRUE"]
          (sut/format-expr [:is :id true])))
   (is (= ["id <> TRUE"]

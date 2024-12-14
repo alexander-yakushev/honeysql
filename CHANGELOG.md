@@ -1,5 +1,8 @@
 # Changes
 
+* 2.6.next in progress
+  * Make SQL Server dialect auto-lift Boolean values to parameters since SQL Server has no `TRUE` / `FALSE` literals.
+
 * 2.6.1243 -- 2024-12-13
   * Address [#558](https://github.com/seancorfield/honeysql/issues/558) by adding `:patch-into` (and `patch-into` helper) for XTDB (but in core).
   * Address [#556](https://github.com/seancorfield/honeysql/issues/556) by adding an XTDB section to the documentation with examples.
