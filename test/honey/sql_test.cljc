@@ -556,13 +556,15 @@
            (-> {:delete-from :foo
                 :where [:= :foo.id 42]}
                (format :dialect :mysql :pretty true)))))
-  (when (str/starts-with? #?(:cljs *clojurescript-version*
-                             :default (clojure-version)) "1.11")
-    (testing "format can be called with mixed arguments"
-      (is (= ["\nDELETE FROM `foo`\nWHERE `foo`.`id` = ?\n" 42]
-             (-> {:delete-from :foo
-                  :where [:= :foo.id 42]}
-                 (format :dialect :mysql {:pretty true})))))))
+  (let [version #?(:cljs *clojurescript-version*
+                   :default (clojure-version))]
+    (when (or (str/starts-with? version "1.12")
+              (str/starts-with? version "1.11"))
+      (testing "format can be called with mixed arguments"
+        (is (= ["\nDELETE FROM `foo`\nWHERE `foo`.`id` = ?\n" 42]
+               (-> {:delete-from :foo
+                    :where [:= :foo.id 42]}
+                   (format :dialect :mysql {:pretty true}))))))))
 
 (deftest delete-from-test
   (is (= ["DELETE FROM `foo` WHERE `foo`.`id` = ?" 42]
