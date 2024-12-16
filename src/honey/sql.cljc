@@ -2553,6 +2553,10 @@
 
 (comment
   (format {:truncate :foo})
+  (format [:and])
+  (format [:and] {:dialect :sqlserver})
+  (format {:select :* :from :table :where (map= {})})
+  (format {:select :* :from :table :where (map= {})} {:dialect :sqlserver})
   (format-expr [:= :id 1])
   (format-expr [:+ :id 1])
   (format-expr [:+ 1 [:+ 1 :quux]])
