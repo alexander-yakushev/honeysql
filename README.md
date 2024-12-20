@@ -8,7 +8,7 @@ SQL as Clojure data structures. Build queries programmatically -- even at runtim
 [![cljdoc](https://cljdoc.org/badge/com.github.seancorfield/honeysql?2.6.1243)](https://cljdoc.org/d/com.github.seancorfield/honeysql/CURRENT)
 [![Slack](https://img.shields.io/badge/slack-HoneySQL-orange.svg?logo=slack)](https://clojurians.slack.com/app_redirect?channel=honeysql)
 [![Join Slack](https://img.shields.io/badge/slack-join_clojurians-orange.svg?logo=slack)](http://clojurians.net)
-
+[![Zulip](https://img.shields.io/badge/zulip-honeysql-orange.svg)](https://clojurians.zulipchat.com/#narrow/channel/152091-honeysql)
 
 This project follows the version scheme MAJOR.MINOR.COMMITS where MAJOR and MINOR provide some relative indication of the size of the change, but do not follow semantic versioning. In general, all changes endeavor to be non-breaking (by moving to new names rather than by breaking existing names). COMMITS is an ever-increasing counter of commits since the beginning of this repository.
 
