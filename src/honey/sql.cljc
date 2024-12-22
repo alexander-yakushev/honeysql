@@ -2723,4 +2723,6 @@
     :from            [(keyword "'`a-b.b-c.c-d`")]}
    (sql/format))
   (sql/format {:select :* :from [[[:json_to_recordset :my-json-column] [:b {:with-columns [[:c :int] [:d :text]]}]]]})
+  (sql/format {:select :* :from :my_publications :where [:= :is_published true]}
+              {:dialect :sqlserver})
   )
