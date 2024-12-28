@@ -253,7 +253,7 @@
   * Fixes #344 by no longer dropping the qualifier on columns in a `SET` clause _for the `:mysql` dialect only_; the behavior is unchanged for all other dialects.
   * Fixes #340 by making the "hyphen to space" logic more general so _operators_ containing `-` should retain the hyphen without special cases.
   * Documentation improvements: `:fetch`, `:lift`, `:limit`, `:offset`, `:param`, `:select`; also around JSON/PostgreSQL.
-  * Link to the [HoneySQL web app](https://www.john-shaffer.com/honeysql/) in both the README and **Getting Started**.
+  * Link to the [HoneySQL web app](https://john.shaffe.rs/honeysql/) in both the README and **Getting Started**.
   * Switch to `tools.build` for running tests and JAR building etc.
 
 * 2.0.0-rc5 (for testing; 2021-07-17)
