@@ -26,7 +26,7 @@ To execute SQL statements, you will also need a JDBC wrapper like
 
 You can also experiment with HoneySQL directly in a browser -- no installation
 required -- using [John Shaffer](https://github.com/john-shaffer)'s awesome
-[HoneySQL web app](https://www.john-shaffer.com/honeysql/), written in ClojureScript!
+[HoneySQL web app](https://john.shaffe.rs/honeysql/), written in ClojureScript!
 
 ## Basic Concepts
 
