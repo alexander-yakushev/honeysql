@@ -43,3 +43,11 @@
   (is (= "1, 2, 3, 4"
          (sut/join ", " (remove nil?) [1 nil 2 nil 3 nil nil nil 4])))
   (is (= "" (sut/join ", " (remove nil?) [nil nil nil nil]))))
+
+(deftest split-by-separator-test
+  (is (= [""] (sut/split-by-separator "" ".")))
+  (is (= ["" ""] (sut/split-by-separator "." ".")))
+  (is (= ["hello"] (sut/split-by-separator "hello" ".")))
+  (is (= ["h" "e" "l" "l" "o"] (sut/split-by-separator "h.e.l.l.o" ".")))
+  (is (= ["" "h" "e" "" "" "l" "" "l" "o" ""]
+         (sut/split-by-separator ".h.e...l..l.o." "."))))

@@ -75,3 +75,16 @@
 
       :default
       (clojure.string/join separator (transduce xform conj [] coll)))))
+
+(defn split-by-separator
+  "More efficient implementation of `clojure.string/split` for cases when a
+  literal string (not regex) is used as a separator, and for cases where the
+  separator is not present in the haystack at all."
+  [s sep]
+  (loop [start 0, res []]
+    (if-let [sep-idx (clojure.string/index-of s sep start)]
+      (recur (inc sep-idx) (conj res (subs s start sep-idx)))
+      (if (= start 0)
+        ;; Fastpath - zero separators in s
+        [s]
+        (conj res (subs s start))))))

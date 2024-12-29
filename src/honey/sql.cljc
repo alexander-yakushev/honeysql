@@ -31,7 +31,7 @@
   (:require [clojure.string :as str]
             #?(:clj [clojure.template])
             [honey.sql.protocols :as p]
-            [honey.sql.util :refer [str join]]))
+            [honey.sql.util :refer [str join split-by-separator]]))
 
 ;; default formatting for known clauses
 
@@ -316,7 +316,7 @@
                             [n %]
                             (if aliased
                               [%]
-                              (str/split % #"\."))))
+                              (split-by-separator % "."))))
          parts       (parts-fn col-e)
          entity      (join "." (map #(cond-> % (not= "*" %) (quote-fn))) parts)]
      (suspicious-entity-check entity)
@@ -457,7 +457,7 @@
                 :default (subs (str x) 1))
              (str x))]
      (cond (str/starts-with? c "%")
-           (let [[f & args] (str/split (subs c 1) #"\.")]
+           (let [[f & args] (split-by-separator (subs c 1) ".")]
              [(str (format-fn-name f) "("
                    (join ", " (map #(format-entity (keyword %) opts)) args)
                    ")")])
