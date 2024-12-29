@@ -88,3 +88,19 @@
         ;; Fastpath - zero separators in s
         [s]
         (conj res (subs s start))))))
+
+(defn into*
+  "An extension of `clojure.core/into` that accepts multiple \"from\" arguments.
+  Doesn't support `xform`."
+  ([to from1] (into* to from1 nil nil nil))
+  ([to from1 from2] (into* to from1 from2 nil nil))
+  ([to from1 from2 from3] (into* to from1 from2 from3 nil))
+  ([to from1 from2 from3 from4]
+   (if (or from1 from2 from3 from4)
+     (as-> (transient to) to'
+       (reduce conj! to' from1)
+       (reduce conj! to' from2)
+       (reduce conj! to' from3)
+       (reduce conj! to' from4)
+       (persistent! to'))
+     to)))

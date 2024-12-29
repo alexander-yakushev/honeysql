@@ -31,7 +31,7 @@
   (:require [clojure.string :as str]
             #?(:clj [clojure.template])
             [honey.sql.protocols :as p]
-            [honey.sql.util :refer [str join split-by-separator]]))
+            [honey.sql.util :refer [str join split-by-separator into*]]))
 
 ;; default formatting for known clauses
 
@@ -525,14 +525,10 @@
                               :else
                               (throw (ex-info "bigquery * only supports except and replace"
                                               {:clause k :arg arg})))]
-                    (-> [(cond->> sql' sql (str sql " "))]
-                        (into params)
-                        (into params'))))
+                    (into* [(cond->> sql' sql (str sql " "))] params params')))
                 []
                 (partition-all 2 x))]
-    (-> [(str sql " " sql')]
-        (into params)
-        (into params'))))
+    (into* [(str sql " " sql')] params params')))
 
 (comment
   (bigquery-*-except-replace? [:* :except [:a :b :c]])
@@ -676,9 +672,7 @@
                        sql'))
                 (when hints
                   (str " WITH (" hints ")")))]
-          (into params)
-          (into params')
-          (into params'')))))
+          (into* params params' params'')))))
 
 (defn- format-selectable-dsl
   ([x] (format-selectable-dsl x {}))
@@ -752,9 +746,8 @@
              (let [[cur & params]  (peek result)
                    [sql & params'] (first exprs)]
                (recur (rest exprs) args' false (conj (pop result)
-                                                     (-> [(str cur " " sql)]
-                                                         (into params)
-                                                         (into params')))))
+                                                     (into* [(str cur " " sql)]
+                                                            params params'))))
              (recur (rest exprs) args' false (conj result (first exprs))))))
        (reduce-sql result)))))
 
@@ -836,7 +829,7 @@
          (str (sql-kw :select) " " sql)
          true
          cols)]
-    (-> [sql'] (into params) (into params'))))
+    (into* [sql'] params params')))
 
 (defn- format-select-top [k xs]
   (let [[top & cols] xs
@@ -864,7 +857,7 @@
               (join " " (map sql-kw) parts))
          true
          cols)]
-    (-> [sql'] (into params) (into params'))))
+    (into* [sql'] params params')))
 
 (defn- format-select-into [k xs]
   (let [[v e] (ensure-sequential xs)
@@ -956,19 +949,14 @@
                                      (format-dsl expr))
                   [sql'' & params'' :as sql-params'']
                   (if non-query-expr?
-                    (cond-> [(str sql' " AS " sql)]
-                      params' (into params')
-                      params  (into params))
+                    (into* [(str sql' " AS " sql)] params' params)
                     ;; according to docs, CTE should _always_ be wrapped:
-                    (cond-> [(str sql " " (as-fn with) " " (str "(" sql' ")"))]
-                      params  (into params)
-                      params' (into params')))
+                    (into* [(str sql " " (as-fn with) " " (str "(" sql' ")"))]
+                           params params'))
                   [tail-sql & tail-params]
                   (format-with-query-tail tail)]
               (if (seq tail-sql)
-                (cond-> [(str sql'' " " tail-sql)]
-                  params''    (into params'')
-                  tail-params (into tail-params))
+                (into* [(str sql'' " " tail-sql)] params'' tail-params)
                 sql-params''))))
          xs)]
     (into [(str (sql-kw k) " " (join ", " sqls))] params)))
@@ -1012,10 +1000,7 @@
                               (str cols-sql' " "))
                         overriding
                         sql)]
-                  (into t-params)
-                  (into c-params)
-                  (into cols-params')
-                  (into params)))
+                  (into* t-params c-params cols-params' params)))
             (sequential? (second table))
             (let [[table cols] table
                   [t-sql & t-params] (format-entity-alias table)
@@ -1025,23 +1010,20 @@
                         (join ", " c-sqls)
                         ")"
                         overriding)]
-                  (into t-params)
-                  (into c-params)))
+                  (into* t-params c-params)))
             :else
             (let [[sql & params] (format-entity-alias table)]
               (-> [(str (sql-kw k) " " sql
                         (when (seq cols')
                           (str " " cols-sql'))
                         overriding)]
-                  (into cols-params')
-                  (into params))))
+                  (into* cols-params' params))))
       (let [[sql & params] (format-entity-alias table)]
         (-> [(str (sql-kw k) " " sql
                   (when (seq cols')
                     (str " " cols-sql'))
                   overriding)]
-            (into cols-params')
-            (into params))))))
+            (into* cols-params' params))))))
 
 (comment
   (format-insert :insert-into [[[:raw ":foo"]] {:select :bar}])
@@ -1069,12 +1051,10 @@
                          (str "("
                               (join ", " u-sqls)
                               ")"))
-                   (-> params (into params-j) (into u-params))])
+                   (into* params params-j u-params)])
                 (let [[sql & params'] (when e (format-expr e))]
                   [(cond-> sqls e (conj "ON" sql))
-                   (-> params
-                       (into params-j)
-                       (into params'))])))))
+                   (into* params params-j params')])))))
          [[] []]
          clauses)]
     (into [(join " " sqls)] params)))
@@ -1282,8 +1262,7 @@
                   (str " (" (join ", " sqls) ")"))
                 (when sql
                   (str " " sql)))]
-          (into expr-params)
-          (into clause-params)))
+          (into* expr-params clause-params)))
     (format-on-conflict k [x])))
 
 (defn- format-do-update-set [k x]
@@ -1302,8 +1281,7 @@
                 where (or (:where x) ('where x))
                 [sql & params] (when where (format-dsl {:where where}))]
             (-> [(str sets (when sql (str " " sql)))]
-                (into set-params)
-                (into params)))
+                (into* set-params params)))
           (format-set-exprs k x))
         (sequential? x)
         (let [[cols clauses] (split-with (complement map?) x)]
@@ -1852,23 +1830,18 @@
                (= 1 (count params-y))
                (coll? v1))
           (let [sql (str "(" (join ", " (repeat (count v1) "?")) ")")]
-            (-> [(str sql-x " " (sql-kw in) " " sql)]
-                (into params-x)
-                (into v1)))
+            (into* [(str sql-x " " (sql-kw in) " " sql)] params-x v1))
           (and *numbered*
                (= (str "$" (count @*numbered*)) sql-y)
                (= 1 (count params-y))
                (coll? v1))
           (let [vs  (for [v v1] (->numbered v))
                 sql (str "(" (join ", " (map first) vs) ")")]
-            (-> [(str sql-x " " (sql-kw in) " " sql)]
-                (into params-x)
-                (conj nil)
-                (into (map second vs))))
+            (into* [(str sql-x " " (sql-kw in) " " sql)]
+                   params-x [nil] (map second vs)))
           :else
-          (-> [(str sql-x " " (sql-kw in) " " sql-y)]
-              (into params-x)
-              (into (if *numbered* values params-y))))))
+          (into* [(str sql-x " " (sql-kw in) " " sql-y)]
+                 params-x (if *numbered* values params-y)))))
 
 (defn- function-0 [k xs]
   [(str (sql-kw k)
@@ -1912,7 +1885,7 @@
                   (let [[sql-e & params-e] (format-expr e)
                         [sql-c & params-c] (format-dsl c {:nested true})]
                     [(conj sqls (str sql-e " " (sql-kw k) " " sql-c))
-                     (-> params (into params-e) (into params-c))]))
+                     (into* params params-e params-c)]))
                 [[] []]
                 (partition 2 pairs))]
     (into [(join ", " sqls)] params)))
@@ -1931,7 +1904,7 @@
                              (= 'else condition))
                        (conj sqls (sql-kw :else) sqlv)
                        (conj sqls (sql-kw :when) sqlc (sql-kw :then) sqlv))
-                     (-> params (into paramsc) (into paramsv))]))
+                     (into* params paramsc paramsv)]))
                 [[] []]
                 (partition 2 (if case-expr? (rest clauses) clauses)))]
     (-> [(str (sql-kw :case) " "
@@ -1939,8 +1912,7 @@
                 (str sqlx " "))
               (join " " sqls)
               " " (sql-kw :end))]
-        (into paramsx)
-        (into params))))
+        (into* paramsx params))))
 
 (defn- between-fn
   "For both :between and :not-between"
@@ -1948,10 +1920,8 @@
   (let [[sql-x & params-x] (format-expr x {:nested true})
         [sql-a & params-a] (format-expr a {:nested true})
         [sql-b & params-b] (format-expr b {:nested true})]
-    (-> [(str sql-x " " (sql-kw k) " " sql-a " AND " sql-b)]
-        (into params-x)
-        (into params-a)
-        (into params-b))))
+    (into* [(str sql-x " " (sql-kw k) " " sql-a " AND " sql-b)]
+           params-x params-a params-b)))
 
 (defn- object-record-literal
   [k [x]]
@@ -1970,9 +1940,7 @@
                                 (let [[sql' & params'] (format-expr %)]
                                   (cons (str "[" sql' "]") params')))
                          kix))]
-    (-> [(str "(" sql ")" (join "" sqls))]
-        (into params)
-        (into params'))))
+    (into* [(str "(" sql ")" (join "" sqls))] params params')))
 
 (defn ignore-respect-nulls [k [x]]
   (let [[sql & params] (format-expr x)]
@@ -2045,9 +2013,7 @@
             [sql' & params'] (if (ident? type)
                                [(sql-kw type)]
                                (format-expr type))]
-        (-> [(str "CAST(" sql " AS " sql' ")")]
-            (into params)
-            (into params'))))
+        (into* [(str "CAST(" sql " AS " sql' ")")] params params')))
     :composite
     (fn [_ [& args]]
       (let [[sqls params] (format-expr-list args)]
@@ -2060,9 +2026,7 @@
     (fn [_ [pattern escape-chars]]
       (let [[sql-p & params-p] (format-expr pattern)
             [sql-e & params-e] (format-expr escape-chars)]
-        (-> [(str sql-p " " (sql-kw :escape) " " sql-e)]
-            (into params-p)
-            (into params-e))))
+        (into* [(str sql-p " " (sql-kw :escape) " " sql-e)] params-p params-e)))
     :filter expr-clause-pairs
     :get-in #'get-in-navigation
     :ignore-nulls ignore-respect-nulls
@@ -2109,9 +2073,7 @@
     (fn [k [e & qs]]
       (let [[sql-e & params-e] (format-expr e)
             [sql-q & params-q] (format-dsl {k qs})]
-        (-> [(str sql-e " " sql-q)]
-            (into params-e)
-            (into params-q))))
+        (into* [(str sql-e " " sql-q)] params-e params-q)))
     :over
     (fn [_ [& args]]
       (let [[sqls params]
@@ -2122,7 +2084,7 @@
                                                  [(format-entity p)])]
                         [(conj sqls (str sql-e " OVER " sql-p
                                          (when a (str " AS " (format-entity a)))))
-                         (-> params (into params-e) (into params-p))]))
+                         (into* params params-e params-p)]))
                     [[] []]
                     args)]
         (into [(join ", " sqls)] params)))
@@ -2163,8 +2125,7 @@
         (cond-> nested
           (as-> s (str "(" s ")")))
         (vector)
-        (into p1)
-        (into p2))))
+        (into* p1 p2))))
 
 (defn- format-infix-expr [op' op expr nested]
   (let [args (cond->> (rest expr)

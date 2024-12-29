@@ -51,3 +51,12 @@
   (is (= ["h" "e" "l" "l" "o"] (sut/split-by-separator "h.e.l.l.o" ".")))
   (is (= ["" "h" "e" "" "" "l" "" "l" "o" ""]
          (sut/split-by-separator ".h.e...l..l.o." "."))))
+
+(deftest into*-test
+  (is (= [1] (sut/into* [1] nil)))
+  (is (= [1] (sut/into* [1] [])))
+  (is (= [1] (sut/into* [1] nil [] nil [])))
+  (is (= [1 2 3] (sut/into* [1] [2 3])))
+  (is (= [1 2 3 4 5 6] (sut/into* [1] [2 3] [4 5 6])))
+  (is (= [1 2 3 4 5 6 7] (sut/into* [1] [2 3] [4 5 6] [7])))
+  (is (= [1 2 3 4 5 6 7 8 9] (sut/into* [1] [2 3] [4 5 6] [7] [8 9]))))
