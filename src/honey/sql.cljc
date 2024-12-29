@@ -1753,7 +1753,10 @@
   (if (keyword? k)
     (if-let [n (namespace k)]
       (symbol n (name k))
-      (symbol (name k)))
+      ;; In CLJ runtime, reuse symbol that's already present in the keyword.
+      #?(:bb (symbol (name k))
+         :clj (.sym ^clojure.lang.Keyword k)
+         :default (symbol (name k))))
     k))
 
 (defn format-dsl
