@@ -1177,17 +1177,17 @@
                                  x))
                              xs)))
                 [sqls params]
-                (reduce (fn [[sql params] [sqls' params']]
-                          [(conj sql
-                                 (if (sequential? sqls')
-                                   (str "(" (join ", " sqls') ")")
-                                   sqls'))
-                           (into params params')])
+                (reduce (fn [[sql params] x]
+                          (if (sequential? x)
+                            (let [[sqls' params'] (format-expr-list x)]
+                              [(conj sql
+                                     (if (sequential? sqls')
+                                       (str "(" (join ", " sqls') ")")
+                                       sqls'))
+                               (into* params params')])
+                            [(conj sql (sql-kw x)) params]))
                         [[] []]
-                        (map #(if (sequential? %)
-                                (format-expr-list %)
-                                [(sql-kw %)])
-                             xs'))
+                        xs')
                 sqls (if row-ctr (map #(str "ROW" %) sqls) sqls)]
             (into [(str (sql-kw k) " " (join ", " sqls))] params))
 
@@ -1199,26 +1199,26 @@
                                             (contains-clause? :replace-into)
                                             (contains-clause? :columns)))
                 [sqls params]
-                (reduce (fn [[sql params] [sqls' params']]
-                          [(conj sql
-                                 (if (sequential? sqls')
-                                   (str "(" (join ", " sqls') ")")
-                                   sqls'))
-                           (if params' (into params params') params')])
-                        [[] []]
-                        (map (fn [m]
-                               (if (map? m)
-                                 (format-expr-list
-                                  (map #(get m
-                                             %
-                                             ;; issue #366: use NULL or DEFAULT
-                                             ;; for missing column values:
-                                             (if (contains? *values-default-columns* %)
-                                               [:default]
-                                               nil))
-                                       cols))
-                                 [(sql-kw m)]))
-                             xs))]
+                (reduce
+                 (fn [[sql params] x]
+                   (if (map? x)
+                     (let [[sqls' params']
+                           (reduce-sql (map #(format-expr
+                                              (get x %
+                                                   ;; issue #366: use NULL or DEFAULT
+                                                   ;; for missing column values:
+                                                   (if (contains? *values-default-columns* %)
+                                                     [:default]
+                                                     nil))))
+                                       cols)]
+                       [(conj sql
+                              (if (sequential? sqls')
+                                (str "(" (join ", " sqls') ")")
+                                sqls'))
+                        (into* params params')])
+                     [(conj sql (sql-kw x)) params]))
+                 [[] []]
+                 xs)]
             (into [(str (when cols-sql
                           (str cols-sql " "))
                         (sql-kw k)
