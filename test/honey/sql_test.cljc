@@ -221,7 +221,26 @@
               :from   [:hits :stuff]
               :where  [:= :EventDate :ts_upper_bound]})
            ["WITH ? AS ts_upper_bound, stuff AS (SELECT * FROM songs) SELECT * FROM hits, stuff WHERE EventDate = ts_upper_bound"
-            "2019-08-01 15:23:00"]))))
+            "2019-08-01 15:23:00"])))
+  (testing "Use expression in a WITH clause"
+    (is (= (format
+            {:with     [[:s [:sum :bytes]]]
+             :select   [:s]
+             :from     [:table]})
+           ["WITH SUM(bytes) AS s SELECT s FROM table"]))
+
+    (is (= (format
+            {:with   [[:v [:raw "m['k']"]]]
+             :select [:v]
+             :from   [:table]})
+           ["WITH m['k'] AS v SELECT v FROM table"]))
+
+    (is (= (format
+            {:with   [[:cond [:and [:= :a 1] [:= :b 2] [:= :c 3]]]]
+             :select [:v]
+             :from   [:table]
+             :where  :cond})
+           ["WITH (a = ?) AND (b = ?) AND (c = ?) AS cond SELECT v FROM table WHERE cond" 1 2 3]))))
 
 (deftest insert-into
   (is (= (format {:insert-into :foo})
