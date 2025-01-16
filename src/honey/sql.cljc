@@ -1203,7 +1203,7 @@
                                  (if (sequential? sqls')
                                    (str "(" (join ", " sqls') ")")
                                    sqls'))
-                           (if params' (into params params') params')])
+                           (if params' (into params params') params)])
                         [[] []]
                         (map (fn [m]
                                (if (map? m)

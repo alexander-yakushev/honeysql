@@ -5,6 +5,7 @@
   * More performance optimizations via PR [#560](https://github.com/seancorfield/honeysql/pull/560) [@alexander-yakushev](https://github.com/alexander-yakushev).
   * Fix two broken links to the [HoneySQL web app](https://john.shaffe.rs/honeysql/) via PR [#559](https://github.com/seancorfield/honeysql/pull/559) [@whatacold](https://github.com/whatacold).
   * Make SQL Server dialect auto-lift Boolean values to parameters since SQL Server has no `TRUE` / `FALSE` literals.
+  * Fix bug in `DEFAULT` values clause (that omitted some values).
 
 * 2.6.1243 -- 2024-12-13
   * Address [#558](https://github.com/seancorfield/honeysql/issues/558) by adding `:patch-into` (and `patch-into` helper) for XTDB (but in core).
