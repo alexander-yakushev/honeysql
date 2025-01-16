@@ -943,7 +943,7 @@
          (map
           (fn [[x expr & tail :as with]]
             (let [[sql & params] (format-with-part x)
-                  non-query-expr? (or (ident? expr) (string? expr))
+                  non-query-expr? (not (map? expr))
                   [sql' & params'] (if non-query-expr?
                                      (format-expr expr)
                                      (format-dsl expr))
