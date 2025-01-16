@@ -1,6 +1,7 @@
 # Changes
 
 * 2.6.next in progress
+  * Support expressions in `WITH` clauses via PR [#563](https://github.com/seancorfield/honeysql/pull/563) [@krevedkokun](https://github.com/krevedkokun).
   * More performance optimizations via PR [#560](https://github.com/seancorfield/honeysql/pull/560) [@alexander-yakushev](https://github.com/alexander-yakushev).
   * Fix two broken links to the [HoneySQL web app](https://john.shaffe.rs/honeysql/) via PR [#559](https://github.com/seancorfield/honeysql/pull/559) [@whatacold](https://github.com/whatacold).
   * Make SQL Server dialect auto-lift Boolean values to parameters since SQL Server has no `TRUE` / `FALSE` literals.
