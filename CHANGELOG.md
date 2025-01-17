@@ -1,6 +1,6 @@
 # Changes
 
-* 2.6.next in progress
+* 2.6.1267 -- 2025-01-16
   * Support expressions in `WITH` clauses via PR [#563](https://github.com/seancorfield/honeysql/pull/563) [@krevedkokun](https://github.com/krevedkokun).
   * More performance optimizations via PRs [#560](https://github.com/seancorfield/honeysql/pull/560) and [#562](https://github.com/seancorfield/honeysql/pull/562) [@alexander-yakushev](https://github.com/alexander-yakushev).
   * Fix two broken links to the [HoneySQL web app](https://john.shaffe.rs/honeysql/) via PR [#559](https://github.com/seancorfield/honeysql/pull/559) [@whatacold](https://github.com/whatacold).
