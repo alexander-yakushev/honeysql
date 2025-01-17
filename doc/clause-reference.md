@@ -1421,7 +1421,7 @@ user=> (sql/format {:insert-into :table
                     :values [{:a 1 :b 2 :c 3}
                              :default
                              {:a 4 :b 5 :c 6}]})
-["INSERT INTO table (a, b, c) VALUES (?, ?, ?), DEFAULT, (?, ?, ?)" 6 5 4]
+["INSERT INTO table (a, b, c) VALUES (?, ?, ?), DEFAULT, (?, ?, ?)" 1 2 3 4 5 6]
 user=> (sql/format {:insert-into :table
                     :values [[1 2 3] :default [4 5 6]]})
 ["INSERT INTO table VALUES (?, ?, ?), DEFAULT, (?, ?, ?)" 1 2 3 4 5 6]
